@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import com.google.zxing.LuminanceSource;
 
 public class BufferedImageLuminanceSource extends LuminanceSource {
+	
 	private final BufferedImage image;
 	private final int left;
 	private final int top;
