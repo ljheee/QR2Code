@@ -3,9 +3,15 @@ package com.ljheee.demo;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-
 import com.google.zxing.LuminanceSource;
 
+/**
+ * LuminanceSource这类层次结构的目的是不同的位图实现跨平台为请求获得灰度亮度值的标准接口。该接口只提供了抽象方法，
+ * 因此可以生成和旋转创建副本。这是为了确保一个读者不修改原来的亮度源，并让它在一个未知的状态，在链中的其他读者。
+ * https://zxing.github.io/zxing/apidocs/com/google/zxing/LuminanceSource.html
+ * @author ljheee
+ *
+ */
 public class BufferedImageLuminanceSource extends LuminanceSource {
 	
 	private final BufferedImage image;
@@ -16,6 +22,14 @@ public class BufferedImageLuminanceSource extends LuminanceSource {
 		this(image, 0, 0, image.getWidth(), image.getHeight());
 	}
 
+	/**
+	 * 构造方法
+	 * @param image
+	 * @param left
+	 * @param top
+	 * @param width
+	 * @param height
+	 */
 	public BufferedImageLuminanceSource(BufferedImage image, int left, int top, int width, int height) {
 		super(width, height);
 
@@ -39,7 +53,9 @@ public class BufferedImageLuminanceSource extends LuminanceSource {
 		this.top = top;
 	}
 
-	public byte[] getRow(int y, byte[] row) {
+	
+	@Override
+	public byte[] getRow(int y, byte[] row) {//从底层平台的位图提取一行（only one row）的亮度数据值
 		if (y < 0 || y >= getHeight()) {
 			throw new IllegalArgumentException("Requested row is outside the image: " + y);
 		}
@@ -51,7 +67,8 @@ public class BufferedImageLuminanceSource extends LuminanceSource {
 		return row;
 	}
 
-	public byte[] getMatrix() {
+	@Override
+	public byte[] getMatrix() {///从底层平台的位图提取亮度数据值
 		int width = getWidth();
 		int height = getHeight();
 		int area = width * height;
@@ -60,19 +77,26 @@ public class BufferedImageLuminanceSource extends LuminanceSource {
 		return matrix;
 	}
 
-	public boolean isCropSupported() {
+	@Override
+	public boolean isCropSupported() {//是否支持裁剪
 		return true;
 	}
 
+	/**
+	 * 返回一个新的对象与裁剪的图像数据。实现可以保存对原始数据的引用，而不是复制。
+	 */
+	@Override
 	public LuminanceSource crop(int left, int top, int width, int height) {
 		return new BufferedImageLuminanceSource(image, this.left + left, this.top + top, width, height);
 	}
-
-	public boolean isRotateSupported() {
+	
+	@Override
+	public boolean isRotateSupported() {//是否支持旋转
 		return true;
 	}
 
-	public LuminanceSource rotateCounterClockwise() {
+	@Override
+	public LuminanceSource rotateCounterClockwise() {//逆时针旋转图像数据的90度，返回一个新的对象。
 		int sourceWidth = image.getWidth();
 		int sourceHeight = image.getHeight();
 		AffineTransform transform = new AffineTransform(0.0, -1.0, 1.0, 0.0, 0.0, sourceWidth);
